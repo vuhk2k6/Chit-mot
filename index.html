@@ -64,6 +64,7 @@
         }
 
         #error-log { display: none; position: absolute; top: 0; left: 0; color: red; background: rgba(0,0,0,0.8); z-index: 999; padding: 10px; }
+        .input_video { display: none; }
     </style>
 </head>
 <body>
@@ -82,8 +83,8 @@
     <div id="copyright">© by vandiep</div>
 
     <div id="canvas-container"></div>
-    <video class="input_video" style="display:none"></video>
-    <canvas id="camera-preview"></canvas>
+    <video class="input_video"></video>
+    <canvas id="camera-preview" width="120" height="90"></canvas>
 
     <script>
         // ==========================================
@@ -484,12 +485,16 @@
             const video = document.getElementsByClassName('input_video')[0];
             const canvas = document.getElementById('camera-preview');
             const ctx = canvas.getContext('2d');
+            // Ensure the drawing buffer matches the displayed size (prevents aspect-ratio distortion)
+            canvas.width = canvas.width || 120;
+            canvas.height = canvas.height || 90;
             
             const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
             hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
 
             hands.onResults(results => {
-                ctx.clearRect(0,0,100,75); ctx.drawImage(results.image, 0, 0, 100, 75);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
                 // --- Hand Logic  ---
                 if (results.multiHandLandmarks.length === 2) {
